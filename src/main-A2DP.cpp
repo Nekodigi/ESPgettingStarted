@@ -1,76 +1,48 @@
-#include <Audio.h>
-#include <SPIFFS.h>
+#include "nvs_flash.h"
 
-#define I2S_DOUT 22 // DIN
-#define I2S_BCLK 14 // BCK
-#define I2S_LRC 15  // LCK
-
-Audio audio;
+#include "BluetoothA2DPSink.h"
+BluetoothA2DPSink a2dp_sink;
 
 void setup()
 {
   Serial.begin(115200);
 
-  SPIFFS.begin();
-  audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  audio.setVolume(21); // default 0...21
+  // NVSの初期化
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+  {
+    nvs_flash_erase();
+    nvs_flash_init();
+  }
 
-  audio.connecttoFS(SPIFFS, "/kanpai.mp3");
+  // set i2s pin
+  i2s_pin_config_t my_pin_config = {
+      .bck_io_num = 0,
+      .ws_io_num = 2,
+      .data_out_num = 1,
+      .data_in_num = I2S_PIN_NO_CHANGE};
+  // set i2s mode
+  static i2s_config_t i2s_config = {
+      .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+      .sample_rate = 44100, // updated automatically by A2DP
+      .bits_per_sample = (i2s_bits_per_sample_t)32,
+      .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
+      .communication_format = (i2s_comm_format_t)(I2S_COMM_FORMAT_STAND_I2S),
+      .intr_alloc_flags = 0, // default interrupt priority
+      .dma_buf_count = 8,
+      .dma_buf_len = 64,
+      .use_apll = true,
+      .tx_desc_auto_clear = true // avoiding noise in case of data unavailability
+  };
+
+  a2dp_sink.set_pin_config(my_pin_config);
+  // a2dp_sink.set_i2s_config(i2s_config);
+  //  a2dp_sink.set_auto_reconnect(true);
+  //   set device name
+  a2dp_sink.start("BT_Audio");
 }
 
 void loop()
 {
-  audio.loop();
-}
-
-// optional
-void audio_info(const char *info)
-{
-  Serial.print("info        ");
-  Serial.println(info);
-}
-void audio_id3data(const char *info)
-{ // id3 metadata
-  Serial.print("id3data     ");
-  Serial.println(info);
-}
-void audio_eof_mp3(const char *info)
-{ // end of file
-  Serial.print("eof_mp3     ");
-  Serial.println(info);
-}
-void audio_showstation(const char *info)
-{
-  Serial.print("station     ");
-  Serial.println(info);
-}
-void audio_showstreamtitle(const char *info)
-{
-  Serial.print("streamtitle ");
-  Serial.println(info);
-}
-void audio_bitrate(const char *info)
-{
-  Serial.print("bitrate     ");
-  Serial.println(info);
-}
-void audio_commercial(const char *info)
-{ // duration in sec
-  Serial.print("commercial  ");
-  Serial.println(info);
-}
-void audio_icyurl(const char *info)
-{ // homepage
-  Serial.print("icyurl      ");
-  Serial.println(info);
-}
-void audio_lasthost(const char *info)
-{ // stream URL played
-  Serial.print("lasthost    ");
-  Serial.println(info);
-}
-void audio_eof_speech(const char *info)
-{
-  Serial.print("eof_speech  ");
-  Serial.println(info);
+  // put your main code here, to run repeatedly:
 }

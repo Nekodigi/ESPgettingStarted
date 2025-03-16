@@ -17,13 +17,13 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint32_t value = 0;
 
-const int ledPin = 2; // Use the appropriate GPIO pin for your setup
+const int ledPin = LED_BUILTIN; // Use the appropriate GPIO pin for your setup
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
-#define SERVICE_UUID "fbe9d7a9-175f-45d8-ad87-cc5ad87a9518"
-#define SENSOR_CHARACTERISTIC_UUID "11205ca7-a2c5-478d-b141-4cc461e66ef9"
-#define LED_CHARACTERISTIC_UUID "0f026a46-313a-4d6e-a9bf-961fb901653d"
+#define SERVICE_UUID "19b10000-e8f2-537e-4f6c-d104768a1214"
+#define SENSOR_CHARACTERISTIC_UUID "19b10001-e8f2-537e-4f6c-d104768a1214"
+#define LED_CHARACTERISTIC_UUID "19b10002-e8f2-537e-4f6c-d104768a1214"
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
